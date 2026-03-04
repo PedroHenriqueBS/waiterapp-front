@@ -8,9 +8,11 @@ interface OrderModalProps {
   open: boolean;
   onClose: () => void;
   order: null | Order;
+  onDelete: () => Promise<void>;
+  isLoading: boolean;
 }
 
-export function OrderModal({ open, onClose, order }: OrderModalProps) {
+export function OrderModal({ open, onClose, order, onDelete, isLoading }: OrderModalProps) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -45,13 +47,7 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
         <div className="status-container">
           <small>Status do pedido</small>
           <div>
-            <span>
-              {order.status === "WAITING"
-                ? "🕒"
-                : order.status === "IN_PRODUCTION"
-                  ? "👩‍🍳"
-                  : "✅"}
-            </span>
+            <span>{order.status === "WAITING" ? "🕒" : order.status === "IN_PRODUCTION" ? "👩‍🍳" : "✅"}</span>
             <strong>
               {order.status === "WAITING"
                 ? "Fila de espera"
@@ -68,11 +64,7 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
           <div className="order-items">
             {order.products.map(({ _id, product, quantity }) => (
               <div className="item" key={_id}>
-                <img
-                  width={80}
-                  src={`http://localhost:3001/uploads/${product.imagePath}`}
-                  alt={product.name}
-                />
+                <img width={80} src={`http://localhost:3001/uploads/${product.imagePath}`} alt={product.name} />
                 <span className="quantity">{quantity}x</span>
                 <div className="product-details">
                   <strong>{product.name}</strong>
@@ -89,18 +81,10 @@ export function OrderModal({ open, onClose, order }: OrderModalProps) {
         </OrderDetails>
 
         <Actions>
-          <button
-            type="button"
-            className="primary"
-            disabled={order.status !== "WAITING"}
-          >
+          <button type="button" className="primary" disabled={isLoading}>
             <span>Iniciar produção</span>
           </button>
-          <button
-            type="button"
-            className="secondary"
-            disabled={order.status !== "WAITING"}
-          >
+          <button type="button" className="secondary" disabled={isLoading} onClick={onDelete}>
             <span>Cancelar pedido</span>
           </button>
         </Actions>

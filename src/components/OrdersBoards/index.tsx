@@ -1,30 +1,40 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+
 import type { Order } from "../../types/Order";
 import { Board, OrdersContainer } from "./styles";
 import { OrderModal } from "../OrderModal";
+import { api } from "../../utils/api";
 
 interface OrdersBoardsProps {
   icon: string;
   title: string;
   orders: Order[];
+  onDeleteOrder: (orderId: string) => void;
 }
 
-export function OrdersBoards({ icon, title, orders }: OrdersBoardsProps) {
+export function OrdersBoards({ icon, title, orders, onDeleteOrder }: OrdersBoardsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<null | Order>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   function handleOpenModal(order: Order) {
-    setSelectedOrder(order);
     setIsModalOpen(true);
+    setSelectedOrder(order);
+  }
+
+  async function handleDeleteOrder() {
+    setIsLoading(true);
+    await api.delete(`/orders/${selectedOrder?._id}`);
+    onDeleteOrder(selectedOrder!._id);
+    setIsLoading(false);
+    setIsModalOpen(false);
+    toast.success(`Pedido da mesa ${selectedOrder?.table} foi cancelado com sucesso!`);
   }
 
   return (
     <Board>
-      <OrderModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        order={selectedOrder}
-      />
+      <OrderModal open={isModalOpen} onClose={() => setIsModalOpen(false)} order={selectedOrder} onDelete={handleDeleteOrder} isLoading={isLoading} />
       <header>
         <span>{icon}</span>
         <strong>{title}</strong>
@@ -34,11 +44,7 @@ export function OrdersBoards({ icon, title, orders }: OrdersBoardsProps) {
       {orders.length > 0 && (
         <OrdersContainer>
           {orders.map((order) => (
-            <button
-              type="button"
-              key={order._id}
-              onClick={() => handleOpenModal(order)}
-            >
+            <button type="button" key={order._id} onClick={() => handleOpenModal(order)}>
               <strong>Mesa: {order.table}</strong>
               <span>{order.products.length} itens</span>
             </button>

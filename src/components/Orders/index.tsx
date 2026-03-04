@@ -14,24 +14,18 @@ export function Orders() {
   }, []);
 
   const waitingOrders = orders.filter((order) => order.status === "WAITING");
-  const inPreparationOrders = orders.filter(
-    (order) => order.status === "IN_PRODUCTION",
-  );
+  const inPreparationOrders = orders.filter((order) => order.status === "IN_PRODUCTION");
   const readyToServeOrders = orders.filter((order) => order.status === "DONE");
+
+  function handleDeleteOrder(orderId: string) {
+    setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderId));
+  }
 
   return (
     <Container>
-      <OrdersBoards icon="🕒" title="Fila de espera" orders={waitingOrders} />
-      <OrdersBoards
-        icon="🍽️"
-        title="Em preparação"
-        orders={inPreparationOrders}
-      />
-      <OrdersBoards
-        icon="✅"
-        title="Pronto para servir"
-        orders={readyToServeOrders}
-      />
+      <OrdersBoards icon="🕒" title="Fila de espera" orders={waitingOrders} onDeleteOrder={handleDeleteOrder} />
+      <OrdersBoards icon="🍽️" title="Em preparação" orders={inPreparationOrders} onDeleteOrder={handleDeleteOrder} />
+      <OrdersBoards icon="✅" title="Pronto para servir" orders={readyToServeOrders} onDeleteOrder={handleDeleteOrder} />
     </Container>
   );
 }
