@@ -11,9 +11,10 @@ interface OrdersBoardsProps {
   title: string;
   orders: Order[];
   onDeleteOrder: (orderId: string) => void;
+  onChangeOrderStatus: (orderId: string, status: Order["status"]) => void;
 }
 
-export function OrdersBoards({ icon, title, orders, onDeleteOrder }: OrdersBoardsProps) {
+export function OrdersBoards({ icon, title, orders, onDeleteOrder, onChangeOrderStatus }: OrdersBoardsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<null | Order>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,9 +24,22 @@ export function OrdersBoards({ icon, title, orders, onDeleteOrder }: OrdersBoard
     setSelectedOrder(order);
   }
 
+  async function handleChangeOrderStatus() {
+    setIsLoading(true);
+
+    const status = selectedOrder?.status === "WAITING" ? "IN_PRODUCTION" : "DONE";
+
+    await api.patch(`/orders/${selectedOrder?._id}`, { status });
+
+    onChangeOrderStatus(selectedOrder!._id, status);
+    setIsLoading(false);
+    setIsModalOpen(false);
+    toast.success(`Pedido da mesa ${selectedOrder?.table} foi atualizado com sucesso!`);
+  }
+
   async function handleDeleteOrder() {
     setIsLoading(true);
-    await api.delete(`/orders/${selectedOrder?._id}`);
+    await api.delete(`/orders/${selectedOrder?._id}`, {});
     onDeleteOrder(selectedOrder!._id);
     setIsLoading(false);
     setIsModalOpen(false);
@@ -34,7 +48,14 @@ export function OrdersBoards({ icon, title, orders, onDeleteOrder }: OrdersBoard
 
   return (
     <Board>
-      <OrderModal open={isModalOpen} onClose={() => setIsModalOpen(false)} order={selectedOrder} onDelete={handleDeleteOrder} isLoading={isLoading} />
+      <OrderModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        order={selectedOrder}
+        onDelete={handleDeleteOrder}
+        isLoading={isLoading}
+        onChangeOrderStatus={handleChangeOrderStatus}
+      />
       <header>
         <span>{icon}</span>
         <strong>{title}</strong>

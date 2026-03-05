@@ -21,11 +21,33 @@ export function Orders() {
     setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderId));
   }
 
+  function handleOrderStatusChange(orderId: string, status: Order["status"]) {
+    setOrders((prevOrders) => prevOrders.map((order) => (order._id === orderId ? { ...order, status } : order)));
+  }
+
   return (
     <Container>
-      <OrdersBoards icon="🕒" title="Fila de espera" orders={waitingOrders} onDeleteOrder={handleDeleteOrder} />
-      <OrdersBoards icon="🍽️" title="Em preparação" orders={inPreparationOrders} onDeleteOrder={handleDeleteOrder} />
-      <OrdersBoards icon="✅" title="Pronto para servir" orders={readyToServeOrders} onDeleteOrder={handleDeleteOrder} />
+      <OrdersBoards
+        icon="🕒"
+        title="Fila de espera"
+        orders={waitingOrders}
+        onDeleteOrder={handleDeleteOrder}
+        onChangeOrderStatus={handleOrderStatusChange}
+      />
+      <OrdersBoards
+        icon="🍽️"
+        title="Em preparação"
+        orders={inPreparationOrders}
+        onDeleteOrder={handleDeleteOrder}
+        onChangeOrderStatus={handleOrderStatusChange}
+      />
+      <OrdersBoards
+        icon="✅"
+        title="Pronto para servir"
+        orders={readyToServeOrders}
+        onDeleteOrder={handleDeleteOrder}
+        onChangeOrderStatus={handleOrderStatusChange}
+      />
     </Container>
   );
 }

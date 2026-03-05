@@ -10,9 +10,10 @@ interface OrderModalProps {
   order: null | Order;
   onDelete: () => Promise<void>;
   isLoading: boolean;
+  onChangeOrderStatus: () => Promise<void>;
 }
 
-export function OrderModal({ open, onClose, order, onDelete, isLoading }: OrderModalProps) {
+export function OrderModal({ open, onClose, order, onDelete, isLoading, onChangeOrderStatus }: OrderModalProps) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -48,13 +49,7 @@ export function OrderModal({ open, onClose, order, onDelete, isLoading }: OrderM
           <small>Status do pedido</small>
           <div>
             <span>{order.status === "WAITING" ? "🕒" : order.status === "IN_PRODUCTION" ? "👩‍🍳" : "✅"}</span>
-            <strong>
-              {order.status === "WAITING"
-                ? "Fila de espera"
-                : order.status === "IN_PRODUCTION"
-                  ? "Em preparação"
-                  : "Pronto"}
-            </strong>
+            <strong>{order.status === "WAITING" ? "Fila de espera" : order.status === "IN_PRODUCTION" ? "Em preparação" : "Pronto"}</strong>
           </div>
         </div>
 
@@ -81,9 +76,11 @@ export function OrderModal({ open, onClose, order, onDelete, isLoading }: OrderM
         </OrderDetails>
 
         <Actions>
-          <button type="button" className="primary" disabled={isLoading}>
-            <span>Iniciar produção</span>
-          </button>
+          {order.status !== "DONE" && (
+            <button type="button" className="primary" disabled={isLoading} onClick={onChangeOrderStatus}>
+              <span>{order.status === "WAITING" ? "Iniciar produção" : "Concluir pedido"}</span>
+            </button>
+          )}
           <button type="button" className="secondary" disabled={isLoading} onClick={onDelete}>
             <span>Cancelar pedido</span>
           </button>
